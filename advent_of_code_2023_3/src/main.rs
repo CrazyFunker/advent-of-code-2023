@@ -114,7 +114,7 @@ fn interpret_numbers(line: &Vec<char>) -> Vec<Number> {
             digits.push(line[i]);
         } else {
             // if it's not a digit, time to unwrap the digits into a number and save its details
-            temp_digits_to_numbers(
+            digits_to_numbers(
                 &mut digits,
                 i,
                 &mut numbers,
@@ -124,7 +124,7 @@ fn interpret_numbers(line: &Vec<char>) -> Vec<Number> {
     }
 
     // need to check if we have a number at the end of the line
-    temp_digits_to_numbers(
+    digits_to_numbers(
         &mut digits,
         line.len(),
         &mut numbers,
@@ -228,7 +228,7 @@ fn parse_gears_for_cur_line(
     return sum_gear_ratio;
 }
 
-fn temp_digits_to_numbers(
+fn digits_to_numbers(
     digits: &mut Vec<char>,
     i: usize,
     numbers: &mut Vec<Number>,
