@@ -19,7 +19,6 @@ fn main() {
 
     // read the input file
     let path: &Path = Path::new("input.txt");
-
     let file: File = File::open(&path).unwrap();
     let reader = io::BufReader::new(file);
 
