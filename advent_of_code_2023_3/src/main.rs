@@ -44,7 +44,6 @@ fn main() {
 
                 prev_numbers = cur_numbers;
                 cur_numbers = next_numbers;
-                // TODO need to interpret the numbers here
                 next_numbers = interpret_numbers(&bottom_line);
 
                 // special case for first line
@@ -97,13 +96,6 @@ fn main() {
         &mut cur_numbers,
         &mut next_numbers,
     );
-    // println!("upperLine: {:?}", upperLine);
-    // println!("currentLine: {:?}", currentLine);
-    // println!("bottomLine: {:?}", bottomLine);
-
-    // println!("prev_contiguous_digits: {:?}", prev_contiguous_digits);
-    // println!("cur_contiguous_digits: {:?}", cur_contiguous_digits);
-    // println!("next_contiguous_digits: {:?}", next_contiguous_digits);
 
     println!("sum: {}", sum);
     println!("sum_gears: {}", gears_sum);
@@ -139,7 +131,6 @@ fn interpret_numbers(line: &Vec<char>) -> Vec<Number> {
         &mut temp_digit_start_index,
     );
 
-    // println!("numbers: {:?}", numbers);
     return numbers;
 }
 
@@ -193,11 +184,6 @@ fn parse_gears_for_cur_line(
     cur_digits: &mut Vec<Number>,
     next_digits: &mut Vec<Number>,
 ) -> u32 {
-    // println!("cur_gear.len():\t{}", cur_gears.len());
-    // println!("\tprev_digits.len():\t{}", prev_digits.len());
-    // println!("\tcur_digits.len():\t{}", cur_digits.len());
-    // println!("\tnext_digits.len():\t{}", next_digits.len());
-
     let mut sum_gear_ratio: u32 = 0;
 
     for gear in cur_gears {
@@ -232,24 +218,13 @@ fn parse_gears_for_cur_line(
             }
         }
 
-        // println!(
-        //     "\t\t{} surrounding_digits: {:?}",
-        //     surrounding_digits.len(),
-        //     surrounding_digits
-        // );
-
         if surrounding_digits.len() == 2 {
             gear_ratio = surrounding_digits[0].value * surrounding_digits[1].value;
-            // println!(
-            //     "\t\t\tgear_ratio: {} = {} * {}",
-            //     gear_ratio, surrounding_digits[0].value, surrounding_digits[1].value
-            // );
         }
 
         sum_gear_ratio += gear_ratio;
     }
 
-    // println!("\t\tgear_ratio: {}", sum_gear_ratio);
     return sum_gear_ratio;
 }
 
@@ -298,13 +273,11 @@ fn sum_up_numbers_adjacent_to_special_chars(
 
         for i in adjusted_start_index..=adjusted_end_index {
             if collapsed_special_chars[i] != '.' {
-                // println!("{:?}", number);
                 sum += number.value;
                 break;
             }
         }
     }
 
-    // println!("=========================== line sum: {}", sum);
     return sum;
 }
