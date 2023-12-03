@@ -103,32 +103,32 @@ fn main() {
 
 fn interpret_numbers(line: &Vec<char>) -> Vec<Number> {
     let mut numbers: Vec<Number> = Vec::new();
-    let mut temp_digit: Vec<char> = Vec::new();
-    let mut temp_digit_start_index: i32 = -1;
+    let mut digits: Vec<char> = Vec::new();
+    let mut digits_start_index: i32 = -1;
 
     for i in 0..line.len() {
         if line[i].is_digit(10) {
-            if temp_digit_start_index == -1 {
-                temp_digit_start_index = i as i32;
+            if digits_start_index == -1 {
+                digits_start_index = i as i32;
             }
-            temp_digit.push(line[i]);
+            digits.push(line[i]);
         } else {
-            // if it's not a digit, time to unwrap the contiguous digit into a number and save its details
-            temp_digit_to_contiguous_digit(
-                &mut temp_digit,
+            // if it's not a digit, time to unwrap the digits into a number and save its details
+            temp_digits_to_numbers(
+                &mut digits,
                 i,
                 &mut numbers,
-                &mut temp_digit_start_index,
+                &mut digits_start_index,
             );
         }
     }
 
-    // need to check if we have a contiguous digit at the end of the line
-    temp_digit_to_contiguous_digit(
-        &mut temp_digit,
+    // need to check if we have a number at the end of the line
+    temp_digits_to_numbers(
+        &mut digits,
         line.len(),
         &mut numbers,
-        &mut temp_digit_start_index,
+        &mut digits_start_index,
     );
 
     return numbers;
@@ -228,37 +228,37 @@ fn parse_gears_for_cur_line(
     return sum_gear_ratio;
 }
 
-fn temp_digit_to_contiguous_digit(
-    temp_digit: &mut Vec<char>,
+fn temp_digits_to_numbers(
+    digits: &mut Vec<char>,
     i: usize,
-    contiguous_digits: &mut Vec<Number>,
-    temp_digit_start_index: &mut i32,
+    numbers: &mut Vec<Number>,
+    digits_start_index: &mut i32,
 ) {
-    if temp_digit.len() > 0 {
+    if digits.len() > 0 {
         let temp_digit_end_index: i32 = i as i32 - 1;
-        let temp_digit_value: u32 = temp_digit
+        let temp_digit_value: u32 = digits
             .iter()
             .collect::<String>()
             .parse::<u32>()
             .unwrap();
-        contiguous_digits.push(Number {
-            start_index: *temp_digit_start_index as usize,
+        numbers.push(Number {
+            start_index: *digits_start_index as usize,
             end_index: temp_digit_end_index as usize,
             value: temp_digit_value,
         });
-        temp_digit.clear();
-        *temp_digit_start_index = -1;
+        digits.clear();
+        *digits_start_index = -1;
     }
 }
 
 fn sum_up_numbers_adjacent_to_special_chars(
-    contiguous_digits: &mut Vec<Number>,
+    numbers: &mut Vec<Number>,
     current_line: &Vec<char>,
     collapsed_special_chars: &mut Vec<char>,
 ) -> u32 {
     let mut sum: u32 = 0;
 
-    for number in contiguous_digits.iter() {
+    for number in numbers.iter() {
         // get start-1 and end+1 index of string
         let adjusted_start_index: usize = if number.start_index == 0 {
             number.start_index
