@@ -35,7 +35,7 @@ fn main() {
 
                     // let's check if it's a number
                     let search_string: String = queue.iter().collect();
-                    if let Some((index, found_string)) = digits.iter().enumerate().find(|&(_, &s)| search_string.to_lowercase().contains(s)) {
+                    if let Some((index, _)) = digits.iter().enumerate().find(|&(_, &s)| search_string.to_lowercase().contains(s)) {
                         let found_digit: i32 = index as i32 + 1;
                         line_result += found_digit * 10;
                         break;
@@ -63,7 +63,7 @@ fn main() {
 
                     // let's check if it's a number
                     let search_string: String = queue.iter().collect();
-                    if let Some((index, found_string)) = digits.iter().enumerate().find(|&(_, &s)| search_string.to_lowercase().contains(s)) {
+                    if let Some((index, _)) = digits.iter().enumerate().find(|&(_, &s)| search_string.to_lowercase().contains(s)) {
                         let found_digit: i32 = index as i32 + 1;
                         line_result += found_digit;
                         break;
