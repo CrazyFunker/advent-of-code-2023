@@ -88,5 +88,4 @@ fn main() {
     // println!("Games: {:?}", games);
     println!("Sum of games: {}", sum);
     println!("Power of set: {}", power);
-
 }
