@@ -64,7 +64,7 @@ fn main() {
     // while current position != ZZZ
     let mut current_position: String = "AAA".to_string();
     let mut steps: i32 = 0;
-    loop {
+    while current_position != "ZZZ" {
         for c in directions.chars() {
             if c == 'L' {
                 current_position = camel_map.get(&current_position).unwrap().left.clone();
@@ -73,37 +73,36 @@ fn main() {
             }
 
             steps += 1;
-
             if current_position == "ZZZ" {
                 break;
             }
-        }
-        if current_position == "ZZZ" {
-            break;
         }
     }
 
     println!("Steps: {}", steps);
 
-    let mut steps_v2: u64 = 0;
-    let mut break_out_v2 = false;
-    loop {
-        for c in directions.chars() {
-            travel_v2(c, &camel_map, &mut current_positions_v2);
+    let mut steps_v2: Vec<u64> = Vec::new();
+    for current_position in current_positions_v2 {
+        let mut temp_pos = current_position.clone();
+        let mut steps: u64 = 0;
+        while !temp_pos.ends_with('Z') {
+            for c in directions.chars() {
+                if c == 'L' {
+                    temp_pos = camel_map.get(&temp_pos).unwrap().left.clone();
+                } else if c == 'R' {
+                    temp_pos = camel_map.get(&temp_pos).unwrap().right.clone();
+                }
 
-            steps_v2 += 1;
-
-            if are_we_there_yet_v2(&current_positions_v2) {
-                break_out_v2 = true;
-                break;
+                steps += 1;
+                if temp_pos.ends_with('Z') {
+                    break;
+                }
             }
         }
-        if break_out_v2 {
-            break;
-        }
+        steps_v2.push(steps as u64);
     }
-
-    println!("Steps v2: {}", steps_v2);
+    println!("Steps v2: {:?}", steps_v2);
+    println!("LCM: {}", find_lcm(steps_v2));
 }
 
 fn travel_v2(
@@ -122,12 +121,25 @@ fn travel_v2(
     }
 }
 
-fn are_we_there_yet_v2(current_positions: &Vec<String>) -> bool {
-    for position in current_positions {
-        if !position.ends_with('Z') {
-            return false;
-        }
+// find the least common multiple of the numbers in the vector
+fn find_lcm(numbers: Vec<u64>) -> u64 {
+    let mut lcm: u64 = numbers[0];
+    for i in 1..numbers.len() {
+        lcm = (lcm * numbers[i]) / gcd(lcm, numbers[i]);
     }
+    lcm
+}
 
-    return true;
+// find the greatest common divisor of two numbers
+fn gcd(a: u64, b: u64) -> u64 {
+    if b == 0 {
+        return a;
+    }
+    gcd(b, a % b)
+}
+
+fn are_we_there_yet_v2(current_positions: &Vec<String>) -> bool {
+    current_positions
+        .iter()
+        .all(|position| position.ends_with('Z'))
 }
