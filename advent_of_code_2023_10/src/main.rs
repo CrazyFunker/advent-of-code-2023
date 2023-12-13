@@ -3,9 +3,85 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
-fn interpret_lines(lines: Vec<String>, map: &mut HashMap<(i32, i32), char>) -> (i32, i32) {
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_interpret_lines() {
+        let lines = vec![
+            String::from("S..."),
+            String::from("...."),
+            String::from("...."),
+            String::from("...."),
+        ];
+        let mut map: HashMap<(i32, i32), char> = HashMap::new();
+        let (start_pos, max_x) = interpret_lines(lines, &mut map);
+        assert_eq!(start_pos, (0, 0));
+        assert_eq!(map.get(&(0, 0)), Some(&'S'));
+        assert_eq!(map.get(&(1, 0)), Some(&'.'));
+        assert_eq!(map.get(&(0, 1)), Some(&'.'));
+        assert_eq!(map.get(&(3, 3)), Some(&'.'));
+    }
+
+    #[test]
+    fn test_check_if_point_inside_loop() {}
+
+    #[test]
+    fn test_second_part_1() {
+        let lines = vec![String::from("S7"), String::from("LJ")];
+        let mut map: HashMap<(i32, i32), char> = HashMap::new();
+        let (start_pos, max_x) = interpret_lines(lines, &mut map);
+
+        let mut loop_positions: Vec<(i32, i32)> = Vec::new();
+        first_part(start_pos, &map, &mut loop_positions);
+        let second_part: i32 = second_part(map, max_x, loop_positions);
+        assert_eq!(second_part, 0);
+        // Add assertions based on the expected output
+    }
+
+    #[test]
+    fn test_second_part_2() {
+        let lines = vec![
+            String::from("...."),
+            String::from(".S7."),
+            String::from(".LJ."),
+            String::from("...."),
+        ];
+        let mut map: HashMap<(i32, i32), char> = HashMap::new();
+        let (start_pos, max_x) = interpret_lines(lines, &mut map);
+
+        let mut loop_positions: Vec<(i32, i32)> = Vec::new();
+        first_part(start_pos, &map, &mut loop_positions);
+        let second_part: i32 = second_part(map, max_x, loop_positions);
+        assert_eq!(second_part, 0);
+        // Add assertions based on the expected output
+    }
+
+    #[test]
+    fn test_second_part_3() {
+        let lines = vec![
+            String::from("....."),
+            String::from(".S-7."),
+            String::from(".|.|."),
+            String::from(".L-J."),
+            String::from("....."),
+        ];
+        let mut map: HashMap<(i32, i32), char> = HashMap::new();
+        let (start_pos, max_x) = interpret_lines(lines, &mut map);
+
+        let mut loop_positions: Vec<(i32, i32)> = Vec::new();
+        first_part(start_pos, &map, &mut loop_positions);
+        let second_part: i32 = second_part(map, max_x, loop_positions);
+        assert_eq!(second_part, 1);
+        // Add assertions based on the expected output
+    }
+}
+
+fn interpret_lines(lines: Vec<String>, map: &mut HashMap<(i32, i32), char>) -> ((i32, i32), i32) {
     let mut current_x: i32 = 0;
     let mut current_y: i32 = 0;
+    let mut max_x: i32 = 0;
     let mut start_pos: (i32, i32) = (-1, -1);
 
     for line in lines {
@@ -16,27 +92,29 @@ fn interpret_lines(lines: Vec<String>, map: &mut HashMap<(i32, i32), char>) -> (
             }
 
             current_x += 1;
+            if current_x > max_x {
+                max_x = current_x;
+            }
         }
 
         current_x = 0;
         current_y += 1;
     }
 
-    return start_pos;
+    return (start_pos, max_x);
 }
 
 fn main() {
     let mut map: HashMap<(i32, i32), char> = HashMap::new();
-    let mut start_pos: (i32, i32) = (-1, -1);
+    let start_pos: (i32, i32);
 
     // read the input file
     let path: &Path = Path::new("input.txt");
     let file: File = File::open(&path).unwrap();
     let reader = io::BufReader::new(file);
-    let mut current_x: i32 = 0;
-    let mut current_y: i32 = 0;
     let mut loop_positions: Vec<(i32, i32)> = Vec::new();
     let mut lines: Vec<String> = Vec::new();
+    let mut max_x: i32 = 0;
 
     for line in reader.lines() {
         match line {
@@ -49,13 +127,13 @@ fn main() {
         }
     }
 
-    start_pos = interpret_lines(lines, &mut map);
+    (start_pos, max_x) = interpret_lines(lines, &mut map);
     first_part(start_pos, &map, &mut loop_positions);
 
-    second_part(map, loop_positions);
+    second_part(map, max_x, loop_positions);
 }
 
-fn second_part(map: HashMap<(i32, i32), char>, loop_positions: Vec<(i32, i32)>) {
+fn second_part(map: HashMap<(i32, i32), char>, max_x: i32, loop_positions: Vec<(i32, i32)>) -> i32 {
     // Part 2
     let mut result_v2 = 0;
     for pos in map.keys() {
@@ -64,19 +142,24 @@ fn second_part(map: HashMap<(i32, i32), char>, loop_positions: Vec<(i32, i32)>) 
             continue;
         }
 
-        if check_if_point_inside_loop(&pos, &loop_positions, &map) {
-            // println!("Point inside loop: {:?}", pos);
+        if check_if_point_inside_loop(&pos, &loop_positions, &map, max_x) {
+            println!("Point inside loop: {:?} : {}", pos, map.get(pos).unwrap());
             result_v2 += 1;
         }
     }
 
     println!("Result v2: {}", result_v2);
+    return result_v2;
 }
 
-fn first_part(start_pos: (i32, i32), map: &HashMap<(i32, i32), char>, loop_positions: &mut Vec<(i32, i32)>) {
+fn first_part(
+    start_pos: (i32, i32),
+    map: &HashMap<(i32, i32), char>,
+    loop_positions: &mut Vec<(i32, i32)>,
+) {
     let mut cur_pos: (i32, i32) = start_pos;
     let mut steps_taken: u32 = 0;
-    let mut current_c: char = 'S';
+    let mut current_c: char;
     let next_dir_map: HashMap<(char, char), char> = get_next_mode_dir_map();
     let mut cur_dir: char = find_first_step(&cur_pos, map);
 
@@ -105,6 +188,7 @@ fn check_if_point_inside_loop(
     pos: &(i32, i32),
     loop_positions: &Vec<(i32, i32)>,
     map: &HashMap<(i32, i32), char>,
+    max_x: i32,
 ) -> bool {
     // | is a vertical pipe connecting north and south.
     // - is a horizontal pipe connecting east and west.
@@ -114,14 +198,12 @@ fn check_if_point_inside_loop(
     // F is a 90-degree bend connecting south and east.
     // . is ground; there is no pipe in this tile.
     // cur_c == '|' || cur_c == '-' || cur_c == 'L' || cur_c == 'J' || cur_c == '7' || cur_c == 'F'
-    let max_x: i32 = 140;
-
     let mut intersections: u32 = 0;
-    let mut last_c: char = '.';
-    let mut last_was_part_of_loop: bool = false;
-    let mut cur_c: char = '.';
+    let mut last_c: char = map.get(&pos).unwrap().clone();
+    let mut last_was_part_of_loop: bool = false; // we will be only starting from points not being a part of the loop
+    let mut cur_c: char;
 
-    for i in pos.0..max_x {
+    for i in pos.0+1..max_x {
         let cur_pos: (i32, i32) = (i, pos.1);
         cur_c = map.get(&cur_pos).unwrap().clone();
 
@@ -148,7 +230,9 @@ fn check_if_point_inside_loop(
                         }
                     }
                     'S' => {
-                        intersections += 1;
+                        if cur_c == '|' || cur_c == 'L' || cur_c == 'F' {
+                            intersections += 1;
+                        }
                     }
                     '|' => {
                         intersections += 1;
@@ -167,7 +251,23 @@ fn check_if_point_inside_loop(
         } else {
             // current position is NOT part of the loop
             if last_was_part_of_loop {
-                intersections += 1;
+                match last_c {
+                    'S' => {
+                        if cur_c == '|' || cur_c == 'L' || cur_c == 'F' {
+                            intersections += 1;
+                        }
+                    }
+                    '|' => {
+                        intersections += 1;
+                    }
+                    'J' => {
+                        intersections += 1;
+                    }
+                    '7' => {
+                        intersections += 1;
+                    }
+                    _ => panic!("Invalid char: {}", last_c),
+                }
             }
 
             last_was_part_of_loop = false;
@@ -199,6 +299,9 @@ fn find_first_step(pos: &(i32, i32), map: &HashMap<(i32, i32), char>) -> char {
     // check N, E, S, W and if encountered a valid direction, return it
     for c in "NESW".chars() {
         let next_pos: (i32, i32) = get_next_pos_by_dir(pos, c);
+        if next_pos.0 < 0 || next_pos.1 < 0 {
+            continue;
+        }
         let next_c: char = map.get(&next_pos).unwrap().clone();
 
         match c {
