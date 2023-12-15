@@ -1,3 +1,4 @@
+use colored::*;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -16,7 +17,7 @@ mod tests {
             String::from("...."),
         ];
         let mut map: HashMap<(i32, i32), char> = HashMap::new();
-        let (start_pos, max_x) = interpret_lines(lines, &mut map);
+        let (start_pos, _max_x) = interpret_lines(&lines, &mut map);
         assert_eq!(start_pos, (0, 0));
         assert_eq!(map.get(&(0, 0)), Some(&'S'));
         assert_eq!(map.get(&(1, 0)), Some(&'.'));
@@ -25,60 +26,125 @@ mod tests {
     }
 
     #[test]
-    fn test_check_if_point_inside_loop() {}
-
-    #[test]
     fn test_second_part_1() {
         let lines = vec![String::from("S7"), String::from("LJ")];
         let mut map: HashMap<(i32, i32), char> = HashMap::new();
-        let (start_pos, max_x) = interpret_lines(lines, &mut map);
+        let (start_pos, max_x) = interpret_lines(&lines, &mut map);
 
         let mut loop_positions: Vec<(i32, i32)> = Vec::new();
         first_part(start_pos, &map, &mut loop_positions);
-        let second_part: i32 = second_part(map, max_x, loop_positions);
+        let second_part: i32 = second_part_v2(map, max_x, lines.len() as i32, loop_positions);
         assert_eq!(second_part, 0);
-        // Add assertions based on the expected output
     }
 
     #[test]
     fn test_second_part_2() {
         let lines = vec![
             String::from("...."),
-            String::from(".S7."),
-            String::from(".LJ."),
+            String::from(".F7."),
+            String::from(".LS."),
             String::from("...."),
         ];
         let mut map: HashMap<(i32, i32), char> = HashMap::new();
-        let (start_pos, max_x) = interpret_lines(lines, &mut map);
+        let (start_pos, max_x) = interpret_lines(&lines, &mut map);
 
         let mut loop_positions: Vec<(i32, i32)> = Vec::new();
         first_part(start_pos, &map, &mut loop_positions);
-        let second_part: i32 = second_part(map, max_x, loop_positions);
+        let second_part: i32 = second_part_v2(map, max_x, lines.len() as i32, loop_positions);
         assert_eq!(second_part, 0);
-        // Add assertions based on the expected output
     }
 
     #[test]
     fn test_second_part_3() {
         let lines = vec![
             String::from("....."),
-            String::from(".S-7."),
+            String::from(".F-7."),
             String::from(".|.|."),
-            String::from(".L-J."),
+            String::from(".L-S."),
             String::from("....."),
         ];
         let mut map: HashMap<(i32, i32), char> = HashMap::new();
-        let (start_pos, max_x) = interpret_lines(lines, &mut map);
+        let (start_pos, max_x) = interpret_lines(&lines, &mut map);
 
         let mut loop_positions: Vec<(i32, i32)> = Vec::new();
         first_part(start_pos, &map, &mut loop_positions);
-        let second_part: i32 = second_part(map, max_x, loop_positions);
+        let second_part: i32 = second_part_v2(map, max_x, lines.len() as i32, loop_positions);
         assert_eq!(second_part, 1);
-        // Add assertions based on the expected output
+    }
+
+    // result: 4
+    #[test]
+    fn test_second_part_4() {
+        let lines = vec![
+            String::from(".........."),
+            String::from(".F------7."),
+            String::from(".|F----7|."),
+            String::from(".||....||."),
+            String::from(".||....||."),
+            String::from(".|L-7F-J|."),
+            String::from(".|..||..|."),
+            String::from(".L--JL--S."),
+            String::from(".........."),
+        ];
+        let mut map: HashMap<(i32, i32), char> = HashMap::new();
+        let (start_pos, max_x) = interpret_lines(&lines, &mut map);
+
+        let mut loop_positions: Vec<(i32, i32)> = Vec::new();
+        first_part(start_pos, &map, &mut loop_positions);
+        let second_part: i32 = second_part_v2(map, max_x, lines.len() as i32, loop_positions);
+        assert_eq!(second_part, 4);
+    }
+
+    // result: 8
+    #[test]
+    fn test_second_part_5() {
+        let lines = vec![
+            String::from(".F----7F7F7F7F-7...."),
+            String::from(".|F--7||||||||FJ...."),
+            String::from(".||.FJ||||||||L7...."),
+            String::from("FJL7L7LJLJ||LJ.L-7.."),
+            String::from("L--J.L7...LJF7F-7L7."),
+            String::from("....F-J..F7FJ|L7L7L7"),
+            String::from("....L7.F7||L7|.L7L7|"),
+            String::from(".....|FJLJ|FJ|F7|.LJ"),
+            String::from("....FJL-7.||.||||..."),
+            String::from("....L---J.LJ.LSLJ..."),
+        ];
+        let mut map: HashMap<(i32, i32), char> = HashMap::new();
+        let (start_pos, max_x) = interpret_lines(&lines, &mut map);
+
+        let mut loop_positions: Vec<(i32, i32)> = Vec::new();
+        first_part(start_pos, &map, &mut loop_positions);
+        let second_part: i32 = second_part_v2(map, max_x, lines.len() as i32, loop_positions);
+        assert_eq!(second_part, 8);
+    }
+
+    // result: 10
+    #[test]
+    fn test_second_part_6() {
+        let lines = vec![
+            String::from("FF7F7F7F7F7F7F7F---7"),
+            String::from("L|LJ||||||||||||F--J"),
+            String::from("FL-7LSLJ||||||LJL-77"),
+            String::from("F--JF--7||LJLJ.F7FJ-"),
+            String::from("L---JF-JLJ....FJLJJ7"),
+            String::from("|F|F-JF---7...L7L|7|"),
+            String::from("|FFJF7L7F-JF7..L---7"),
+            String::from("7-L-JL7||F7|L7F-7F7|"),
+            String::from("L.L7LFJ|||||FJL7||LJ"),
+            String::from("L7JLJL-JLJLJL--JLJ.L"),
+        ];
+        let mut map: HashMap<(i32, i32), char> = HashMap::new();
+        let (start_pos, max_x) = interpret_lines(&lines, &mut map);
+
+        let mut loop_positions: Vec<(i32, i32)> = Vec::new();
+        first_part(start_pos, &map, &mut loop_positions);
+        let second_part: i32 = second_part_v2(map, max_x, lines.len() as i32, loop_positions);
+        assert_eq!(second_part, 10);
     }
 }
 
-fn interpret_lines(lines: Vec<String>, map: &mut HashMap<(i32, i32), char>) -> ((i32, i32), i32) {
+fn interpret_lines(lines: &Vec<String>, map: &mut HashMap<(i32, i32), char>) -> ((i32, i32), i32) {
     let mut current_x: i32 = 0;
     let mut current_y: i32 = 0;
     let mut max_x: i32 = 0;
@@ -114,7 +180,7 @@ fn main() {
     let reader = io::BufReader::new(file);
     let mut loop_positions: Vec<(i32, i32)> = Vec::new();
     let mut lines: Vec<String> = Vec::new();
-    let mut max_x: i32 = 0;
+    let max_x: i32;
 
     for line in reader.lines() {
         match line {
@@ -127,28 +193,77 @@ fn main() {
         }
     }
 
-    (start_pos, max_x) = interpret_lines(lines, &mut map);
-    first_part(start_pos, &map, &mut loop_positions);
+    (start_pos, max_x) = interpret_lines(&lines, &mut map);
+    let result = first_part(start_pos, &map, &mut loop_positions);
+    println!("Result: {}", result);
 
-    second_part(map, max_x, loop_positions);
+    let result_v2 = second_part_v2(map, max_x, lines.len() as i32, loop_positions);
+    println!("Result v2: {}", result_v2);
 }
 
-fn second_part(map: HashMap<(i32, i32), char>, max_x: i32, loop_positions: Vec<(i32, i32)>) -> i32 {
-    // Part 2
+fn second_part_v2(
+    map: HashMap<(i32, i32), char>,
+    max_x: i32,
+    max_y: i32,
+    loop_positions: Vec<(i32, i32)>,
+) -> i32 {
+    // go char by char from left to right, top to bottom
     let mut result_v2 = 0;
-    for pos in map.keys() {
-        // ignore loop itself
-        if loop_positions.contains(pos) {
-            continue;
+
+    for y in 0..max_y {
+        let mut inside: bool = false;
+        let mut needle_dir: char = 'x';
+        let mut last_needle_dir: char = 'x';
+        for x in 0..max_x {
+            let pos: (i32, i32) = (x, y);
+            let cur_c: char = map.get(&pos).unwrap().clone();
+
+            if loop_positions.contains(&pos) {
+                // we're on top of the loop
+                if cur_c == 'L' || cur_c == '7' {
+                    needle_dir = 'S';
+                }
+                if cur_c == 'F' || cur_c == 'J' || cur_c == 'S' {
+                    needle_dir = 'N';
+                }
+                if cur_c == '|' && last_needle_dir != 'x' {
+                    if last_needle_dir == 'S' {
+                        needle_dir = 'N';
+                    } else {
+                        needle_dir = 'S';
+                    }
+                }
+
+                if needle_dir == 'x' {
+                    print!("{}", cur_c.to_string().green());
+                } else if needle_dir == 'S' {
+                    print!("{}", cur_c.to_string().blue());
+                } else if needle_dir == 'N' {
+                    print!("{}", cur_c.to_string().yellow());
+                }
+
+                if cur_c != '-' && cur_c != '|' {
+                    if needle_dir != last_needle_dir {
+                        inside = !inside;
+                        // print!("{}", "~".green().bold());
+                    }
+                } else if cur_c == '|' {
+                    inside = !inside;
+                    // print!("{}", "~".green().bold());
+                }
+
+                last_needle_dir = needle_dir;
+            } else if inside {
+                print!("{}", "X".red().bold());
+                result_v2 += 1;
+            } else {
+                print!("{}", cur_c.to_string().dimmed());
+            }
         }
 
-        if check_if_point_inside_loop(&pos, &loop_positions, &map, max_x) {
-            println!("Point inside loop: {:?} : {}", pos, map.get(pos).unwrap());
-            result_v2 += 1;
-        }
+        print!("\n");
     }
 
-    println!("Result v2: {}", result_v2);
     return result_v2;
 }
 
@@ -156,7 +271,7 @@ fn first_part(
     start_pos: (i32, i32),
     map: &HashMap<(i32, i32), char>,
     loop_positions: &mut Vec<(i32, i32)>,
-) {
+) -> u32 {
     let mut cur_pos: (i32, i32) = start_pos;
     let mut steps_taken: u32 = 0;
     let mut current_c: char;
@@ -181,102 +296,8 @@ fn first_part(
     }
 
     let result = steps_taken / 2;
-    println!("Result: {}", result);
-}
 
-fn check_if_point_inside_loop(
-    pos: &(i32, i32),
-    loop_positions: &Vec<(i32, i32)>,
-    map: &HashMap<(i32, i32), char>,
-    max_x: i32,
-) -> bool {
-    // | is a vertical pipe connecting north and south.
-    // - is a horizontal pipe connecting east and west.
-    // L is a 90-degree bend connecting north and east.
-    // J is a 90-degree bend connecting north and west.
-    // 7 is a 90-degree bend connecting south and west.
-    // F is a 90-degree bend connecting south and east.
-    // . is ground; there is no pipe in this tile.
-    // cur_c == '|' || cur_c == '-' || cur_c == 'L' || cur_c == 'J' || cur_c == '7' || cur_c == 'F'
-    let mut intersections: u32 = 0;
-    let mut last_c: char = map.get(&pos).unwrap().clone();
-    let mut last_was_part_of_loop: bool = false; // we will be only starting from points not being a part of the loop
-    let mut cur_c: char;
-
-    for i in pos.0+1..max_x {
-        let cur_pos: (i32, i32) = (i, pos.1);
-        cur_c = map.get(&cur_pos).unwrap().clone();
-
-        if loop_positions.contains(&(i, pos.1)) {
-            // current position IS part of the loop
-            // we need to check if it changes over to another part of the loop or ground
-            if !last_was_part_of_loop {
-                intersections += 1;
-            } else {
-                match last_c {
-                    '-' => {
-                        if cur_c == '|' || cur_c == 'L' || cur_c == 'F' {
-                            intersections += 1;
-                        }
-                    }
-                    'L' => {
-                        if cur_c == '|' || cur_c == 'L' || cur_c == 'F' {
-                            intersections += 1;
-                        }
-                    }
-                    'F' => {
-                        if cur_c == '|' || cur_c == 'L' || cur_c == 'F' {
-                            intersections += 1;
-                        }
-                    }
-                    'S' => {
-                        if cur_c == '|' || cur_c == 'L' || cur_c == 'F' {
-                            intersections += 1;
-                        }
-                    }
-                    '|' => {
-                        intersections += 1;
-                    }
-                    'J' => {
-                        intersections += 1;
-                    }
-                    '7' => {
-                        intersections += 1;
-                    }
-                    _ => panic!("Invalid char: {}", last_c),
-                }
-            }
-
-            last_was_part_of_loop = true;
-        } else {
-            // current position is NOT part of the loop
-            if last_was_part_of_loop {
-                match last_c {
-                    'S' => {
-                        if cur_c == '|' || cur_c == 'L' || cur_c == 'F' {
-                            intersections += 1;
-                        }
-                    }
-                    '|' => {
-                        intersections += 1;
-                    }
-                    'J' => {
-                        intersections += 1;
-                    }
-                    '7' => {
-                        intersections += 1;
-                    }
-                    _ => panic!("Invalid char: {}", last_c),
-                }
-            }
-
-            last_was_part_of_loop = false;
-        }
-
-        last_c = cur_c;
-    }
-
-    return intersections % 2 != 0;
+    return result;
 }
 
 fn get_next_pos_by_dir(pos: &(i32, i32), dir: char) -> (i32, i32) {
