@@ -1,4 +1,4 @@
-use colored::*;
+// use colored::*;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead};
@@ -220,16 +220,16 @@ fn second_part_v2(
                 if cur_c == '|' || cur_c == 'F' || cur_c == '7' {
                     inside = !inside;
                 }
-                print!("{}", cur_c.to_string().green());
+                // print!("{}", cur_c.to_string().green());
             } else if inside {
                 result_v2 += 1;
-                print!("{}", "X".red().bold());
+                // print!("{}", "X".red().bold());
             } else {
-                print!("{}", cur_c);
+                // print!("{}", cur_c);
             }
         }
 
-        print!("\n");
+        // print!("\n");
     }
 
     return result_v2;
