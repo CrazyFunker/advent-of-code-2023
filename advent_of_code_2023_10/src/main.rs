@@ -212,52 +212,20 @@ fn second_part_v2(
 
     for y in 0..max_y {
         let mut inside: bool = false;
-        let mut needle_dir: char = 'x';
-        let mut last_needle_dir: char = 'x';
         for x in 0..max_x {
             let pos: (i32, i32) = (x, y);
             let cur_c: char = map.get(&pos).unwrap().clone();
 
             if loop_positions.contains(&pos) {
-                // we're on top of the loop
-                if cur_c == 'L' || cur_c == '7' {
-                    needle_dir = 'S';
-                }
-                if cur_c == 'F' || cur_c == 'J' || cur_c == 'S' {
-                    needle_dir = 'N';
-                }
-                if cur_c == '|' && last_needle_dir != 'x' {
-                    if last_needle_dir == 'S' {
-                        needle_dir = 'N';
-                    } else {
-                        needle_dir = 'S';
-                    }
-                }
-
-                if needle_dir == 'x' {
-                    print!("{}", cur_c.to_string().green());
-                } else if needle_dir == 'S' {
-                    print!("{}", cur_c.to_string().blue());
-                } else if needle_dir == 'N' {
-                    print!("{}", cur_c.to_string().yellow());
-                }
-
-                if cur_c != '-' && cur_c != '|' {
-                    if needle_dir != last_needle_dir {
-                        inside = !inside;
-                        // print!("{}", "~".green().bold());
-                    }
-                } else if cur_c == '|' {
+                if cur_c == '|' || cur_c == 'F' || cur_c == '7' {
                     inside = !inside;
-                    // print!("{}", "~".green().bold());
                 }
-
-                last_needle_dir = needle_dir;
+                print!("{}", cur_c.to_string().green());
             } else if inside {
-                print!("{}", "X".red().bold());
                 result_v2 += 1;
+                print!("{}", "X".red().bold());
             } else {
-                print!("{}", cur_c.to_string().dimmed());
+                print!("{}", cur_c);
             }
         }
 
