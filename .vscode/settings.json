@@ -25,5 +25,6 @@
         "./advent_of_code_2023_23/Cargo.toml",
         "./advent_of_code_2023_24/Cargo.toml",
         "./advent_of_code_2023_25/Cargo.toml",
-    ]
+    ],
+    "lldb.verboseLogging": true
 }
