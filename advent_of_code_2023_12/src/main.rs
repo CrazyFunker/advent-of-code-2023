@@ -30,7 +30,7 @@ fn main() {
         result += get_number_of_arrangements(line.as_str());
     }
     let duration = start.elapsed();
-    
+
     let start_v2 = Instant::now();
     for line in &lines {
         result_v2 += get_number_of_arrangements_v2(line.as_str());
@@ -275,35 +275,142 @@ fn get_number_of_arrangements_v2(condition_record: &str) -> usize {
     return get_number_of_arrangements(condition_record_v2.as_str());
 }
 
+struct DamagedSpringsGroup {
+    number: usize,
+    placement: usize,
+}
+
 fn get_number_of_arrangements(condition_record: &str) -> usize {
     let (record_char_format, record_number_format_vec) =
         interpret_condition_record(condition_record);
     let mut number_of_arrangements = 0;
-
-    let mut offsets: Vec<usize> = get_start_offsets(&record_number_format_vec);
-    let mut last_offsets: Vec<usize> = Vec::new();
-
-    while offsets.ne(&last_offsets) {
-        let arrangement = get_arrangement_from_offsets_and_number_format(
-            &offsets,
-            &record_number_format_vec,
-            record_char_format.len(),
-        );
-        if validate_char_arrangement_against_record_char_format(
-            arrangement.as_str(),
-            record_char_format,
-        ) {
-            number_of_arrangements += 1;
+    let mut groups: Vec<DamagedSpringsGroup> = Vec::new();
+    let mut i: usize = 0;
+    for number in record_number_format_vec {
+        // let's find a place to put this group
+        // check if we can place at current i
+        let mut count = 0;
+        for j in i..record_char_format.len() {
+            let c = record_char_format.chars().nth(j).unwrap();
+            if c != '?' && c != '#' {
+                // cannot place here, try next
+                count = 0;
+                i = j + 1;
+                continue;
+            } else {
+                count += 1;
+            }
+            if count == number {
+                break;
+            }
         }
 
-        last_offsets = offsets.clone();
-        // get next offsets
-        offsets = get_next_offsets(
-            &offsets,
-            &record_number_format_vec,
-            record_char_format.len(),
-        );
+        groups.push(DamagedSpringsGroup {
+            number: number,
+            placement: i,
+        });
+
+        i += 2; // next group needs to be separated by at least one dot
     }
+
+    number_of_arrangements = 1;
+
+    let mut moved = true;
+
+    while moved {
+        moved = false;
+
+        // create next arrangement
+        // try moving a group to the right, if possible, starting from last group till first group
+        let mut last_boundary = record_char_format.len();
+        let mut moved_group_index = 0;
+        for (group_index, group) in groups.iter_mut().rev().enumerate() {
+            if moved {
+                break;
+            }
+
+            if group.placement + group.number < last_boundary {
+                let mut count = 0;
+                let mut j: usize = group.placement + 1;
+                for i in group.placement + 1..last_boundary {
+                    let c = record_char_format.chars().nth(i).unwrap();
+                    if c == '#' || c == '?' {
+                        count += 1;
+                    } else {
+                        j = i;
+                        continue;
+                    }
+
+                    if count == group.number {
+                        moved = true;
+                        number_of_arrangements += 1;
+                        moved_group_index = group_index;
+                        group.placement = j;
+                        break;
+                    }
+                }
+                
+                
+                // break;
+            } else {
+                if group.placement == 0 {
+                    break;
+                }
+                last_boundary = group.placement - 1;
+            }
+        }
+        
+        if moved && moved_group_index < groups.len() - 1 {
+            // now move all the groups to the right next to this moved group (reset them)
+            let mut count = 0;
+            let mut g_i = moved_group_index + 1;
+            let mut c_j: usize = groups[g_i].placement + 1;
+            for c_i in groups[moved_group_index].placement + groups[moved_group_index].number + 1..record_char_format.len() {
+                let c = record_char_format.chars().nth(c_i).unwrap();
+                if c == '#' || c == '?' {
+                    count += 1;
+                    if count == groups[g_i].number {
+                        groups[g_i].placement = c_j;
+                        c_j = c_i + 2;
+                        g_i += 1;
+                        if g_i == groups.len() {
+                            break;
+                        }
+                    }
+                } else {
+                    c_j = c_i + 1;
+                    count = 0;
+                }
+            }
+        }
+    }
+
+    // old solution below ---------------------------------------------
+
+    // let mut offsets: Vec<usize> = get_start_offsets(&record_number_format_vec);
+    // let mut last_offsets: Vec<usize> = Vec::new();
+
+    // while offsets.ne(&last_offsets) {
+    //     let arrangement = get_arrangement_from_offsets_and_number_format(
+    //         &offsets,
+    //         &record_number_format_vec,
+    //         record_char_format.len(),
+    //     );
+    //     if validate_char_arrangement_against_record_char_format(
+    //         arrangement.as_str(),
+    //         record_char_format,
+    //     ) {
+    //         number_of_arrangements += 1;
+    //     }
+
+    //     last_offsets = offsets.clone();
+    //     // get next offsets
+    //     offsets = get_next_offsets(
+    //         &offsets,
+    //         &record_number_format_vec,
+    //         record_char_format.len(),
+    //     );
+    // }
 
     return number_of_arrangements;
 }
