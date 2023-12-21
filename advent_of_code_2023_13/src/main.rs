@@ -165,9 +165,29 @@ impl Pattern {
             index += 1;
             // special case for the last line
             if index == self.h.len() && used_smudge == false && next_sym_index_used_smudge == true {
-                if diff == 1 {
+                // reset to next sym_index
+
+                sym_index = next_sym_index;
+                self.h_sym_index = next_sym_index;
+
+                if next_sym_index_used_smudge == true {
                     used_smudge = true;
-                    self.h_sym_index = Some(index - 1);
+                    next_sym_index_used_smudge = false;
+                } else {
+                    used_smudge = false;
+                }
+
+                // flush discarded q
+                discarded.clear();
+
+                // take slice of queue from start to next_sym_index
+                if next_sym_index != None {
+                    queue = Vec::from(self.h[0..next_sym_index.unwrap() - 1].to_vec());
+                    // reset the index to next_sym_index
+                    index = next_sym_index.unwrap();
+                    next_sym_index = None;
+                } else {
+                    queue = Vec::from(self.h[0..index + 1].to_vec());
                 }
             }
         }
@@ -177,7 +197,7 @@ impl Pattern {
         //     panic!("No h smudge used!");
         // }
         if used_smudge == false {
-            println!("Didn't use smudge, setting h_sym_index to None");
+            // println!("Didn't use smudge, setting h_sym_index to None");
             self.h_sym_index = None;
         }
     }
@@ -328,7 +348,7 @@ impl Pattern {
         //     panic!("No v smudge used!");
         // }
         if used_smudge == false {
-            println!("Didn't use smudge, setting v_sym_index to None");
+            // println!("Didn't use smudge, setting v_sym_index to None");
             self.v_sym_index = None;
         }
     }
